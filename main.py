@@ -4,8 +4,13 @@ import random
 BACKGROUND_COLOR = "#B1DDC6"
 current_card = {}
 
-data = pandas.read_csv("./data/german_words.csv")
-to_learn = data.to_dict(orient="records")
+try:
+    data = pandas.read_csv("./data/words_to_learn.csv")
+except FileNotFoundError:
+    data = pandas.read_csv("./data/german_words.csv")
+finally:
+    to_learn = data.to_dict(orient="records")
+
 def new_card():
     global current_card, flip_timer
     window.after_cancel(flip_timer)
@@ -20,6 +25,13 @@ def flip_card():
     canvas.itemconfig(card_word, text=current_card["English"],fill="white")
     canvas.itemconfig(card_background, image=card_back_img)
 
+def is_known():
+    to_learn.remove(current_card)
+    print(len(to_learn))
+    data = pandas.DataFrame(to_learn)
+    data.to_csv("./data/words_to_learn.csv",index=False)
+
+    new_card()
 
 
 
@@ -43,7 +55,7 @@ button_wrong = Button(image=button_wrong_img, highlightthickness=0,command=new_c
 button_wrong.grid(column=0, row=1)
 
 button_right_img = PhotoImage(file="./images/right.png")
-button_right = Button(image=button_right_img, highlightthickness=0,command=new_card)
+button_right = Button(image=button_right_img, highlightthickness=0,command=is_known)
 button_right.grid(column=1, row=1)
 
 new_card()
